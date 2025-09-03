@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema de Holerites</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      // Configuração do Tailwind para adicionar as cores da empresa e habilitar o modo escuro
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              empresa: {
+                red: "#c0392b",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .view {
+        display: none;
+      }
+      .view.active {
+        display: block;
+      }
+      #loading-view.active {
+        display: flex;
+      }
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #c0392b; /* Cor da empresa */
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300"
+  >
+    <div
+      id="app-container"
+      class="min-h-screen flex flex-col items-center justify-center p-4"
+    >
+      <!-- TELA DE LOGIN -->
+      <div id="login-view" class="view active w-full max-w-md">
+        <div
+          class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg relative"
+        >
+          <button
+            id="theme-toggle-login"
+            class="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <i id="theme-icon-login" data-lucide="sun"></i>
+          </button>
+          <div class="text-center flex flex-col items-center">
+            <img
+              src="https://res.cloudinary.com/dmpqzayaa/image/upload/v1756312909/sqt5fplglswwk8isu9co.jpg"
+              alt="Logo"
+              class="w-16 h-16 object-contain mb-4"
+            />
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">
+              Holerite Online
+            </h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">
+              Acesse sua conta para continuar
+            </p>
+          </div>
+
+          <form id="login-form" class="mt-8">
+            <div class="mb-4">
+              <label
+                for="email"
+                class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1"
+                >Email</label
+              >
+              <input
+                type="email"
+                id="email"
+                class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-empresa-red"
+                required
+                placeholder="usuario@provedor.com"
+              />
+            </div>
+            <div class="mb-6">
+              <label
+                for="password"
+                class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1"
+                >Senha</label
+              >
+              <input
+                type="password"
+                id="password"
+                class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-empresa-red"
+                required
+                placeholder="••••••••"
+              />
+            </div>
+            <button
+              type="submit"
+              class="w-full bg-empresa-red text-white py-2 rounded-lg hover:opacity-90 transition duration-300 font-semibold"
+            >
+              Entrar
+            </button>
+            <div class="text-center mt-4">
+              <a
+                href="#"
+                id="forgot-password-link"
+                class="text-sm text-empresa-red hover:underline"
+                >Esqueceu a senha?</a
+              >
+            </div>
+          </form>
+          <div
+            id="login-error"
+            class="mt-4 text-center text-red-500 text-sm"
+          ></div>
+        </div>
+        <footer
+          class="text-center mt-6 text-sm text-gray-500 dark:text-gray-400"
+        >
+          Criado por
+          <a
+            href="https://github.com/bnocrv"
+            target="_blank"
+            class="font-semibold text-empresa-red hover:underline"
+            >Bruno dos S. Carvalho</a
+          >
+        </footer>
+      </div>
+
+      <!-- TELA DE CARREGAMENTO -->
+      <div id="loading-view" class="view flex-col items-center">
+        <div class="loader"></div>
+        <p class="mt-4 text-gray-600 dark:text-gray-400">Carregando...</p>
+      </div>
+
+      <!-- DASHBOARD (Conteúdo principal após login) -->
+      <div id="dashboard-view" class="view w-full max-w-6xl">
+        <header
+          class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center flex-wrap gap-4"
+        >
+          <div class="w-full sm:w-auto">
+            <h2 class="text-2xl font-bold dark:text-white">Dashboard</h2>
+            <p class="text-gray-500 dark:text-gray-400">
+              Bem-vindo(a), <span id="user-name" class="font-semibold"></span>!
+            </p>
+          </div>
+          <div class="flex items-center gap-4">
+            <button
+              id="theme-toggle-dash"
+              class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <i id="theme-icon-dash" data-lucide="sun"></i>
+            </button>
+            <span
+              id="user-role"
+              class="text-sm font-medium bg-red-100 text-empresa-red px-3 py-1 rounded-full"
+            ></span>
+            <button
+              id="logout-button"
+              class="bg-gray-600 dark:bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition duration-300 text-sm font-semibold"
+            >
+              <i data-lucide="log-out" class="inline-block w-4 h-4 mr-1"></i
+              >Sair
+            </button>
+          </div>
+        </header>
+
+        <main class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-lg">
+          <!-- Dashboard do Funcionário -->
+          <div id="employee-dashboard" class="view">
+            <h3 class="text-xl font-semibold mb-4 dark:text-white">
+              Seus Holerites
+            </h3>
+            <div class="flex items-center mb-4">
+              <label for="year-selector" class="mr-2 font-medium">Ano:</label>
+              <select
+                id="year-selector"
+                class="border border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-transparent"
+              >
+                <option>2025</option>
+                <option>2024</option>
+                <option>2023</option>
+              </select>
+            </div>
+            <div
+              id="payslips-grid"
+              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
+            ></div>
+            <div
+              id="payslip-details"
+              class="mt-6 p-4 border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700 hidden"
+            ></div>
+          </div>
+
+          <!-- Dashboard do RH -->
+          <div id="rh-dashboard" class="view">
+            <div class="border-b border-gray-200 dark:border-gray-700">
+              <nav
+                class="-mb-px flex space-x-6 overflow-x-auto pb-px"
+                aria-label="Tabs"
+              >
+                <button
+                  data-tab="manage-payslips"
+                  class="tab-button border-empresa-red text-empresa-red whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                >
+                  Gerenciar Holerites
+                </button>
+                <button
+                  data-tab="manage-users"
+                  class="tab-button border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                >
+                  Gerenciar Usuários
+                </button>
+              </nav>
+            </div>
+            <div class="pt-6">
+              <!-- Aba de Gerenciar Holerites -->
+              <div id="manage-payslips-tab" class="tab-content">
+                <h3 class="text-xl font-semibold mb-4 dark:text-white">
+                  Adicionar Novo Holerite
+                </h3>
+                <form
+                  id="upload-payslip-form"
+                  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end p-4 border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700 mb-6"
+                >
+                  <div class="lg:col-span-1">
+                    <label class="block text-sm font-medium">Funcionário</label>
+                    <select
+                      id="user-select"
+                      class="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600"
+                    ></select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium">Mês</label>
+                    <select
+                      id="month-select"
+                      class="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600"
+                    ></select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium">Ano</label>
+                    <input
+                      type="number"
+                      id="year-input"
+                      value="2025"
+                      class="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600"
+                    />
+                  </div>
+                  <div class="lg:col-span-1">
+                    <label class="block text-sm font-medium"
+                      >Arquivo (JPG)</label
+                    >
+                    <input
+                      type="file"
+                      id="payslip-file"
+                      class="w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-empresa-red hover:file:bg-red-100 cursor-pointer"
+                      accept=".jpg, .jpeg, .png"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <button
+                      type="submit"
+                      id="upload-button"
+                      class="w-full bg-empresa-red text-white py-2 px-4 rounded-lg hover:opacity-90 font-semibold flex items-center justify-center"
+                    >
+                      Adicionar
+                    </button>
+                  </div>
+                </form>
+                <h3 class="text-xl font-semibold mb-4 dark:text-white">
+                  Todos os Holerites
+                </h3>
+                <div class="overflow-x-auto">
+                  <table class="min-w-full">
+                    <thead class="bg-gray-100 dark:bg-gray-700">
+                      <tr>
+                        <th class="text-left py-2 px-4">Funcionário</th>
+                        <th class="text-left py-2 px-4">Mês/Ano</th>
+                        <th class="text-left py-2 px-4 text-right">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody id="all-payslips-table"></tbody>
+                  </table>
+                </div>
+              </div>
+              <!-- Aba de Gerenciar Usuários -->
+              <div id="manage-users-tab" class="tab-content hidden">
+                <h3 class="text-xl font-semibold mb-4 dark:text-white">
+                  Adicionar Novo Usuário
+                </h3>
+                <form
+                  id="add-user-form"
+                  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end p-4 border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700 mb-6"
+                >
+                  <div>
+                    <label class="block text-sm font-medium">Nome</label>
+                    <input
+                      type="text"
+                      id="new-user-name"
+                      class="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium">Email</label>
+                    <input
+                      type="email"
+                      id="new-user-email"
+                      class="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium">Cargo</label>
+                    <select
+                      id="new-user-role"
+                      class="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600"
+                    >
+                      <option value="funcionario">Funcionário</option>
+                      <option value="rh">RH</option>
+                    </select>
+                  </div>
+                  <div>
+                    <button
+                      type="submit"
+                      class="w-full bg-empresa-red text-white py-2 rounded-lg hover:opacity-90 font-semibold"
+                    >
+                      Adicionar Usuário
+                    </button>
+                  </div>
+                </form>
+                <h3 class="text-xl font-semibold mb-4 dark:text-white">
+                  Todos os Usuários
+                </h3>
+                <div class="overflow-x-auto">
+                  <table class="min-w-full">
+                    <thead class="bg-gray-100 dark:bg-gray-700">
+                      <tr>
+                        <th class="text-left py-2 px-4">Nome</th>
+                        <th class="text-left py-2 px-4">Email</th>
+                        <th class="text-left py-2 px-4">Cargo</th>
+                        <th class="text-left py-2 px-4 text-right">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody id="all-users-table"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- MÓDULO DE SCRIPT -->
+    <script type="module">
+      // Importando os módulos do Firebase
+      import {
+        initializeApp,
+        deleteApp,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+        signOut,
+        onAuthStateChanged,
+        createUserWithEmailAndPassword,
+        sendPasswordResetEmail,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      // Sua configuração do Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyDoOM-pHJvIJETJZzHwoSFOGSgWeToecPM",
+        authDomain: "sistema-contracheque.firebaseapp.com",
+        projectId: "sistema-contracheque",
+        storageBucket: "sistema-contracheque.appspot.com",
+        messagingSenderId: "212477185255",
+        appId: "1:212477185255:web:dae98108b1d4b47d00e642",
+        measurementId: "G-W9NS60FZFG",
+      };
+
+      // Inicializando Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      // --- CONFIGURAÇÃO DO CLOUDINARY ---
+      const CLOUDINARY_CLOUD_NAME = "dmpqzayaa";
+      const CLOUDINARY_UPLOAD_PRESET = "rh_contracheques";
+
+      // --- PERSISTÊNCIA DE DADOS COM LOCALSTORAGE ---
+      const loadData = (key, initialValue) => {
+        try {
+          const storedValue = localStorage.getItem(key);
+          return storedValue ? JSON.parse(storedValue) : initialValue;
+        } catch (e) {
+          console.error(`[Storage] Erro ao carregar '${key}'.`, e);
+          return initialValue;
+        }
+      };
+
+      const saveData = (key, value) => {
+        try {
+          const stringValue = JSON.stringify(value);
+          localStorage.setItem(key, stringValue);
+        } catch (e) {
+          console.error(`[Storage] Erro ao salvar '${key}'.`, e);
+        }
+      };
+
+      const initialUsers = {
+        "bnocrv@proton.me": {
+          id: "uid-master-rh",
+          name: "Admin Master",
+          role: "rh",
+        },
+      };
+
+      let demoUsers = loadData("demoUsers", initialUsers);
+      let demoPayslips = loadData("demoPayslips", []);
+
+      // --- LÓGICA DA APLICAÇÃO ---
+      let currentUserData = null;
+
+      const views = {
+        login: document.getElementById("login-view"),
+        loading: document.getElementById("loading-view"),
+        dashboard: document.getElementById("dashboard-view"),
+        employeeDashboard: document.getElementById("employee-dashboard"),
+        rhDashboard: document.getElementById("rh-dashboard"),
+      };
+
+      const months = [
+        "Janeiro",
+        "Fevereiro",
+        "Março",
+        "Abril",
+        "Maio",
+        "Junho",
+        "Julho",
+        "Agosto",
+        "Setembro",
+        "Outubro",
+        "Novembro",
+        "Dezembro",
+      ];
+
+      function switchView(viewName) {
+        Object.values(views).forEach((v) => {
+          v.classList.remove("active");
+          v.style.display = "none";
+        });
+
+        if (viewName.includes("Dashboard")) {
+          views.dashboard.style.display = "block";
+          views.dashboard.classList.add("active");
+          views[viewName].style.display = "block";
+          views[viewName].classList.add("active");
+        } else {
+          const targetView = views[viewName];
+          if (targetView) {
+            targetView.style.display =
+              targetView.id === "loading-view" ? "flex" : "block";
+            targetView.classList.add("active");
+          }
+        }
+      }
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          initializeDashboard(user.email);
+        } else {
+          currentUserData = null;
+          switchView("login");
+        }
+      });
+
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+          const errorDiv = document.getElementById("login-error");
+          errorDiv.textContent = "";
+          switchView("loading");
+          try {
+            await signInWithEmailAndPassword(auth, email, password);
+          } catch (error) {
+            if (error.code === "auth/invalid-credential") {
+              errorDiv.textContent =
+                "Credenciais inválidas. Verifique seu e-mail e senha.";
+            } else {
+              errorDiv.textContent =
+                "Ocorreu um erro inesperado ao tentar fazer login.";
+            }
+            switchView("login");
+          }
+        });
+
+      document
+        .getElementById("logout-button")
+        .addEventListener("click", () => signOut(auth));
+
+      function initializeDashboard(userEmail) {
+        demoUsers = loadData("demoUsers", initialUsers);
+        demoPayslips = loadData("demoPayslips", []);
+        currentUserData = demoUsers[userEmail];
+
+        if (currentUserData) {
+          document.getElementById("user-name").textContent =
+            currentUserData.name;
+          document.getElementById("user-role").textContent =
+            currentUserData.role;
+
+          if (currentUserData.role === "rh") {
+            switchView("rhDashboard");
+            setupRhDashboard();
+          } else {
+            switchView("employeeDashboard");
+            setupEmployeeDashboard();
+          }
+        } else {
+          alert(
+            "Login realizado, mas seu perfil não foi encontrado no sistema. Contate o RH."
+          );
+          signOut(auth);
+        }
+      }
+
+      function setupEmployeeDashboard() {
+        const yearSelector = document.getElementById("year-selector");
+        const payslipsGrid = document.getElementById("payslips-grid");
+
+        function renderPayslips() {
+          const selectedYear = parseInt(yearSelector.value);
+          payslipsGrid.innerHTML = "";
+          const userPayslips = demoPayslips.filter(
+            (p) => p.userId === currentUserData.id && p.year === selectedYear
+          );
+
+          months.forEach((monthName, index) => {
+            const monthNumber = index + 1;
+            const payslip = userPayslips.find((p) => p.month === monthNumber);
+            const button = document.createElement("button");
+            button.textContent = monthName;
+            button.className = `p-4 rounded-lg text-center font-semibold transition duration-200 ${
+              payslip
+                ? "bg-red-100 dark:bg-empresa-red dark:text-white text-empresa-red hover:bg-red-200"
+                : "bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
+            }`;
+            button.disabled = !payslip;
+            if (payslip) button.onclick = () => showPayslipDetails(payslip);
+            payslipsGrid.appendChild(button);
+          });
+        }
+
+        yearSelector.onchange = renderPayslips;
+        renderPayslips();
+      }
+
+      function showPayslipDetails(payslip) {
+        const detailsDiv = document.getElementById("payslip-details");
+        detailsDiv.classList.remove("hidden");
+        const filename = `holerite_${months[payslip.month - 1]}_${
+          payslip.year
+        }.jpg`;
+
+        detailsDiv.innerHTML = `
+                <h4 class="font-bold dark:text-white">Holerite de ${
+                  months[payslip.month - 1]
+                } / ${payslip.year}</h4>
+                <p>O seu holerite está pronto para download.</p>
+                <a href="${
+                  payslip.fileUrl
+                }" download="${filename}" target="_blank" class="mt-2 inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    <i data-lucide="download" class="w-4 h-4 mr-2"></i>Abrir / Baixar JPG
+                </a>
+            `;
+        lucide.createIcons();
+      }
+
+      function setupRhDashboard() {
+        const tabs = document.querySelectorAll(".tab-button");
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            document
+              .querySelector(".tab-button.border-empresa-red")
+              .classList.replace("border-empresa-red", "border-transparent");
+            document
+              .querySelector(".tab-button.text-empresa-red")
+              .classList.replace("text-empresa-red", "text-gray-500");
+            tab.classList.replace("border-transparent", "border-empresa-red");
+            tab.classList.replace("text-gray-500", "text-empresa-red");
+
+            document
+              .querySelector(".tab-content:not(.hidden)")
+              .classList.add("hidden");
+            document
+              .getElementById(`${tab.dataset.tab}-tab`)
+              .classList.remove("hidden");
+          });
+        });
+        populateMonthSelect();
+        populateUserSelect();
+        renderAllPayslipsTable();
+        renderAllUsersTable();
+      }
+
+      function populateUserSelect() {
+        const select = document.getElementById("user-select");
+        select.innerHTML = "";
+        const employees = Object.values(demoUsers).filter(
+          (u) => u.role === "funcionario"
+        );
+
+        if (employees.length === 0) {
+          select.innerHTML =
+            "<option disabled selected>Nenhum funcionário</option>";
+          return;
+        }
+
+        employees.forEach((user) => {
+          const option = document.createElement("option");
+          option.value = user.id;
+          option.textContent = user.name;
+          select.appendChild(option);
+        });
+      }
+
+      function populateMonthSelect() {
+        const select = document.getElementById("month-select");
+        if (select.options.length > 1) return;
+        months.forEach((name, index) => {
+          const option = document.createElement("option");
+          option.value = index + 1;
+          option.textContent = name;
+          select.appendChild(option);
+        });
+        select.value = new Date().getMonth() + 1;
+      }
+
+      function renderAllPayslipsTable() {
+        const tbody = document.getElementById("all-payslips-table");
+        tbody.innerHTML = "";
+        if (demoPayslips.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="3" class="text-center p-4">Nenhum holerite cadastrado.</td></tr>';
+          return;
+        }
+        demoPayslips.forEach((payslip) => {
+          const user = Object.values(demoUsers).find(
+            (u) => u.id === payslip.userId
+          );
+          const filename = `holerite_${
+            user ? user.name.replace(/\s+/g, "_") : "user"
+          }_${months[payslip.month - 1]}_${payslip.year}.jpg`;
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+                    <td class="py-2 px-4 border-b dark:border-gray-700">${
+                      user ? user.name : "Usuário Removido"
+                    }</td>
+                    <td class="py-2 px-4 border-b dark:border-gray-700">${
+                      months[payslip.month - 1]
+                    } / ${payslip.year}</td>
+                    <td class="py-2 px-4 border-b dark:border-gray-700 text-right">
+                        <a href="${
+                          payslip.fileUrl
+                        }" download="${filename}" target="_blank" class="text-blue-500 hover:underline mr-4">Abrir / Baixar</a>
+                        <button class="text-red-500 hover:underline remove-payslip-btn" data-payslipid="${
+                          payslip.id
+                        }">Remover</button>
+                    </td>
+                `;
+          tbody.appendChild(tr);
+        });
+
+        document.querySelectorAll(".remove-payslip-btn").forEach((button) => {
+          button.addEventListener("click", (e) => {
+            const payslipId = e.target.dataset.payslipid;
+            if (confirm("Tem certeza que deseja remover este holerite?")) {
+              demoPayslips = demoPayslips.filter((p) => p.id !== payslipId);
+              saveData("demoPayslips", demoPayslips);
+              renderAllPayslipsTable();
+            }
+          });
+        });
+      }
+
+      function renderAllUsersTable() {
+        const tbody = document.getElementById("all-users-table");
+        tbody.innerHTML = "";
+        Object.entries(demoUsers).forEach(([email, user]) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+                  <td class="py-2 px-4 border-b dark:border-gray-700">${
+                    user.name
+                  }</td>
+                  <td class="py-2 px-4 border-b dark:border-gray-700">${email}</td>
+                  <td class="py-2 px-4 border-b dark:border-gray-700">
+                      <span class="px-2 py-1 text-xs font-semibold rounded-full ${
+                        user.role === "rh"
+                          ? "bg-red-100 text-empresa-red"
+                          : "bg-blue-100 text-blue-800"
+                      }">
+                          ${user.role}
+                      </span>
+                  </td>
+                  <td class="py-2 px-4 border-b dark:border-gray-700 text-right">
+                      ${
+                        email !== "bnocrv@proton.me"
+                          ? `<button class="text-red-500 hover:underline text-sm remove-user-btn" data-email="${email}">Remover</button>`
+                          : "Master"
+                      }
+                  </td>
+              `;
+          tbody.appendChild(tr);
+        });
+
+        document.querySelectorAll(".remove-user-btn").forEach((button) => {
+          button.addEventListener("click", (e) => {
+            const emailToRemove = e.target.dataset.email;
+            if (
+              confirm(
+                `Tem certeza que deseja remover o usuário ${emailToRemove}? Esta ação não pode ser desfeita.`
+              )
+            ) {
+              delete demoUsers[emailToRemove];
+              saveData("demoUsers", demoUsers);
+              renderAllUsersTable();
+              populateUserSelect();
+            }
+          });
+        });
+      }
+
+      document
+        .getElementById("upload-payslip-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const uploadButton = document.getElementById("upload-button");
+          const fileInput = document.getElementById("payslip-file");
+          const userSelect = document.getElementById("user-select");
+
+          if (!userSelect.value) {
+            alert("Você precisa cadastrar e/ou selecionar um funcionário.");
+            return;
+          }
+          if (fileInput.files.length === 0) {
+            alert("Por favor, selecione um arquivo JPG.");
+            return;
+          }
+
+          uploadButton.disabled = true;
+          uploadButton.innerHTML = `<div class="loader !w-5 !h-5 !border-t-white !border-2"></div>`;
+
+          const file = fileInput.files[0];
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+          try {
+            const response = await fetch(
+              `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
+
+            if (!response.ok) throw new Error("Falha no upload do Cloudinary");
+
+            const data = await response.json();
+
+            let fileUrl = data.secure_url;
+
+            const newPayslip = {
+              id: `ps${Date.now()}`,
+              userId: userSelect.value,
+              month: parseInt(document.getElementById("month-select").value),
+              year: parseInt(document.getElementById("year-input").value),
+              fileUrl: fileUrl,
+            };
+            demoPayslips.push(newPayslip);
+            saveData("demoPayslips", demoPayslips);
+
+            alert(
+              `Holerite para ${
+                userSelect.options[userSelect.selectedIndex].text
+              } adicionado com sucesso!`
+            );
+            renderAllPayslipsTable();
+            e.target.reset();
+          } catch (error) {
+            console.error("Cloudinary Upload Error:", error);
+            alert(
+              "Ocorreu um erro ao enviar o arquivo. Verifique suas credenciais do Cloudinary no código e a conexão com a internet."
+            );
+          } finally {
+            uploadButton.disabled = false;
+            uploadButton.innerHTML = "Adicionar";
+          }
+        });
+
+      document
+        .getElementById("add-user-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const name = document.getElementById("new-user-name").value;
+          const email = document.getElementById("new-user-email").value;
+          const role = document.getElementById("new-user-role").value;
+
+          if (demoUsers[email]) {
+            alert("Este email já está cadastrado no sistema.");
+            return;
+          }
+
+          let userCreationApp;
+          try {
+            const appName = `userCreation-${Date.now()}`;
+            userCreationApp = initializeApp(firebaseConfig, appName);
+            const secondaryAuth = getAuth(userCreationApp);
+
+            await createUserWithEmailAndPassword(
+              secondaryAuth,
+              email,
+              `temporaryPassword${Date.now()}`
+            );
+            await sendPasswordResetEmail(auth, email);
+
+            demoUsers[email] = {
+              id: `uid-${Date.now()}`,
+              name: name,
+              role: role,
+            };
+            // CORREÇÃO CRÍTICA APLICADA AQUI: Salvar a lista correta de usuários.
+            saveData("demoUsers", demoUsers);
+
+            alert(
+              `Usuário ${name} criado com sucesso!\n\nUm email foi enviado para ${email} para que ele possa definir sua senha de acesso.`
+            );
+
+            renderAllUsersTable();
+            populateUserSelect();
+            e.target.reset();
+          } catch (error) {
+            if (error.code === "auth/email-already-in-use") {
+              alert(
+                "Erro: Este email já foi cadastrado no Firebase. Se desejar adicioná-lo ao sistema, peça para o usuário tentar logar."
+              );
+            } else if (error.code === "auth/invalid-email") {
+              alert("Erro: O email fornecido não é válido.");
+            } else {
+              alert(
+                "Ocorreu um erro ao criar o usuário no Firebase. Verifique o console."
+              );
+            }
+          } finally {
+            if (userCreationApp) {
+              await deleteApp(userCreationApp);
+            }
+          }
+        });
+
+      document
+        .getElementById("forgot-password-link")
+        .addEventListener("click", async (e) => {
+          e.preventDefault();
+          const email = document.getElementById("email").value;
+          if (!email) {
+            alert("Por favor, digite seu email no campo correspondente.");
+            return;
+          }
+          try {
+            await sendPasswordResetEmail(auth, email);
+            alert(
+              `Um email de redefinição de senha foi enviado para ${email}. Verifique sua caixa de entrada e spam.`
+            );
+          } catch (error) {
+            alert(
+              "Ocorreu um erro ao tentar enviar o email. Verifique se o email está correto."
+            );
+          }
+        });
+
+      // --- LÓGICA DO TEMA ---
+      const themeToggleLogin = document.getElementById("theme-toggle-login");
+      const themeToggleDash = document.getElementById("theme-toggle-dash");
+      const themeIconLogin = document.getElementById("theme-icon-login");
+      const themeIconDash = document.getElementById("theme-icon-dash");
+      const htmlEl = document.documentElement;
+
+      const applyTheme = (theme) => {
+        if (theme === "dark") {
+          htmlEl.classList.add("dark");
+          themeIconLogin.setAttribute("data-lucide", "moon");
+          themeIconDash.setAttribute("data-lucide", "moon");
+        } else {
+          htmlEl.classList.remove("dark");
+          themeIconLogin.setAttribute("data-lucide", "sun");
+          themeIconDash.setAttribute("data-lucide", "sun");
+        }
+        lucide.createIcons();
+      };
+
+      const savedTheme =
+        localStorage.getItem("theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light");
+      applyTheme(savedTheme);
+
+      const toggleTheme = () => {
+        const isDark = htmlEl.classList.toggle("dark");
+        const newTheme = isDark ? "dark" : "light";
+        localStorage.setItem("theme", newTheme);
+        applyTheme(newTheme);
+      };
+
+      themeToggleLogin.addEventListener("click", toggleTheme);
+      themeToggleDash.addEventListener("click", toggleTheme);
+
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
