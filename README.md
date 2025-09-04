@@ -4,7 +4,7 @@ O **Sistema de Holerite** é uma aplicação web completa para emissão e visual
 
 Este projeto foi desenvolvido com **HTML, CSS e JavaScript puro (Vanilla)**, utilizando **Firebase Authentication**, **Firestore** e **Cloudinary** para armazenamento de arquivos.
 
-[🚀 Acesse o sistema](https://github.com/bnocrv/sistema-holerite)
+[🚀 Acesse o sistema](https://sistema-holerite.vercel.app)
 
 ---
 
